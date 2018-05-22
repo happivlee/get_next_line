@@ -22,11 +22,16 @@ int	get_next_line(const int fd, char **line)
 	char		tmp[BUFF_SIZE + 1];
 	//static char storage[BUFF_SIZE + 1];
 	//char buf[BUF_SIZE + 1];
+
 	static char *storage = NULL;
 	if (storage == NULL)
 		storage = ft_strnew(BUFF_SIZE);
+	ft_bzero(tmp, ft_strlen(tmp));
+	//checks for errors
+	if (fd < 0 || line == NULL || read(fd, storage, 0) < 0)
+		return (-1);
 	*line = NULL;
-	//tmp = NULL;
+	//stmp = NULL;
 	while (!ft_strchr(storage, '\n'))
 	{
 		if (!storage[0])
@@ -56,22 +61,27 @@ int	get_next_line(const int fd, char **line)
 	}
 		//if a \n is found in the current storage..
 		match = ft_strchr((const char *)storage, '\n');
-		match_word = ft_strsub((const char *)storage, 0, match - storage);
+		match_word = ft_strsub((const char *)storage, 0, match - storage); //when new line is first thing read in storage, match_word = 0
+		match_word[ft_strlen(match_word)] = '\0'; //is this adding a null???
 		if (*line)
 		{
 			ft_strcpy(tmp, *line);
+			//free(*line);
 			*line = ft_strnew(ft_strlen(*line) + (match - storage));
 			*line = ft_strjoin(tmp, match_word);
 		}
 		else
 			//*line = ft_strnew(match - storage);
 			*line = match_word;
-		ft_memmove(storage, match + 1, ft_strlen(match - 1));
+		// if (match_word == NULL) //trying to say if match_word is "" 		//Q: Why does this not work?
+		// 	ft_memmove(storage, match + 1, 1);
+		if (match - storage == 0) //this works to increment the pointer by 1!!! may not need lines 74-75
+			ft_memmove(storage, match + 1, 1);
+		else
+			ft_memmove(storage, match + 1, ft_strlen(match - 1)); //when nl is first char,
 		return (1);
-	//need to change -1 to equal the condition...
-	//return (-1);
 }
-
+//do I need to free tmp?
 int	main(int argc, char **argv)
 {
 	int		fd;
