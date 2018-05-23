@@ -6,7 +6,7 @@
 /*   By: vlee <marvin@42.fr>                        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/05/02 16:03:12 by vlee              #+#    #+#             */
-/*   Updated: 2018/05/08 18:26:38 by vlee             ###   ########.fr       */
+/*   Updated: 2018/05/22 18:47:45 by vlee             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,15 @@ int	get_next_line(const int fd, char **line)
 {
 	char		*match;
 	char		*match_word;
-	char		tmp[BUFF_SIZE + 1];
+	//char		tmp[BUFF_SIZE + 1];
+	char		*tmp;
 	//static char storage[BUFF_SIZE + 1];
 	//char buf[BUF_SIZE + 1];
 
 	static char *storage = NULL;
 	if (storage == NULL)
 		storage = ft_strnew(BUFF_SIZE);
-	ft_bzero(tmp, ft_strlen(tmp));
+	//ft_bzero(tmp, ft_strlen(tmp));
 	//checks for errors
 	if (fd < 0 || line == NULL || read(fd, storage, 0) < 0)
 		return (-1);
@@ -46,7 +47,7 @@ int	get_next_line(const int fd, char **line)
 			if (*line)
 			{
 				ft_strcpy(tmp, *line);
-				free(*line);
+				//free(*line);
 				*line = ft_strnew(ft_strlen(*line) + ft_strlen(storage));
 				*line = ft_strcat(tmp, storage);
 			}
@@ -56,7 +57,7 @@ int	get_next_line(const int fd, char **line)
 				*line = ft_strnew(ft_strlen(storage));
 				ft_strcpy(*line, storage);
 			}
-			printf("storage while looking for nl contains: %s\n", storage);
+			//printf("storage while looking for nl contains: %s\n", storage);
 			ft_bzero(storage, ft_strlen(storage));
 		}
 	}
@@ -66,7 +67,8 @@ int	get_next_line(const int fd, char **line)
 		//match_word[ft_strlen(match_word)] = '\0'; //is this adding a null???
 		if (*line)
 		{
-			ft_strcpy(tmp, *line);
+			tmp = ft_strdup(*line);
+			//ft_strcpy(tmp, *line);
 			//free(*line);
 			*line = ft_strnew(ft_strlen(*line) + (match - storage));
 			*line = ft_strjoin(tmp, match_word);
@@ -77,7 +79,7 @@ int	get_next_line(const int fd, char **line)
 			*line = match_word;
 		// if (match_word == NULL) //trying to say if match_word is "" 		//Q: Why does this not work?
 		// 	ft_memmove(storage, match + 1, 1);
-		printf("storage before memmove contains: %s\n", storage);
+		//printf("storage before memmove contains: %s\n", storage);
 		// printf("1st char before memmove: %c\n", storage[0]);
 		// printf("2nd char before memmove: %c\n", storage[1]);
 		// printf("3rd char before memmove: %c\n", storage[2]);
@@ -86,11 +88,14 @@ int	get_next_line(const int fd, char **line)
 			ft_memmove(storage, match + 1, ft_strlen(match));
 		else
 			ft_memmove(storage, match + 1, ft_strlen(match - 1)); //when nl is first char,
-		printf("storage after memmove contains: %s\n", storage);
+		//printf("storage after memmove contains: %s\n", storage);
 		// printf("1st char after memmove: %c\n", storage[0]);
 		// printf("2nd char after memmove: %c\n", storage[1]);
 		// printf("3rd char after memmove: %c\n", storage[2]);
 		// printf("4th char after memmove: %c\n", storage[3]);
+		//ft_bzero(tmp, ft_strlen(tmp));
+		ft_memdel((void *)&tmp);
+		//free(tmp);
 		return (1);
 }
 //do I need to free tmp?
@@ -105,13 +110,17 @@ int	main(int argc, char **argv)
 		write(2, "error opening file", ft_strlen("error opening file"));
 	while ((ret = get_next_line(fd, &line)))
 	{
+		ft_putstr(line);
+		ft_putchar('\n');
+
+		/*
 		printf("ret: %d\n", ret);
 		if (ret == -1)
 		{
 			printf("error - returning -1\n");
 			return (-1);
 		}
-		printf("the line that will be printed: %s\n", line);
+		printf("the line that will be printed: %s\n", line);*/
 	}
 	return (0);
 }
