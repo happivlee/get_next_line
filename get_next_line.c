@@ -48,8 +48,9 @@ static int move_up_to_newline_from_buffer(char **line, char *buf)
 
 int	get_next_line(const int fd, char **line)
 {
-	char		*i_newline;
+	char				*i_newline;
 	static char *storage[9999];
+	int					bytes_read;
 
 	if (fd < 0 || line == NULL || fd > 9999 || read(fd, storage[fd], 0) < 0)
 		return (-1);
@@ -58,8 +59,13 @@ int	get_next_line(const int fd, char **line)
 	*line = NULL;
 	while (!ft_strchr(storage[fd], '\n'))
 	{
-		if (!storage[fd][0] && (!read(fd, storage[fd], BUFF_SIZE)))
-				return (*line) ? 1 : 0;
+		if (!storage[fd][0])
+		{
+			if (!(bytes_read = read(fd, storage[fd], BUFF_SIZE)))
+					return (*line) ? 1 : 0;
+			else if (bytes_read > 0 && bytes_read < BUFF_SIZE)
+					ft_bzero(storage[fd] + bytes_read, BUFF_SIZE - bytes_read);
+		}
 		if (!(i_newline = ft_strchr((const char *)storage[fd], '\n')))
 			move_all_from_buffer(line, storage[fd]);
 	}
@@ -68,24 +74,24 @@ int	get_next_line(const int fd, char **line)
 	return (1);
 }
 
-// int	main(int argc, char **argv)
-// {
-// 	int		fd;
-// 	char	*line;
-// 	int		ret;
-// 	int		lines;
-//
-// 	fd = open(argv[1], O_RDONLY);
-// 	printf("fd: %d\n", fd);
-// 	lines = 0;
-// 	if (fd == -1)
-// 		write(2, "error opening file", ft_strlen("error opening file"));
-// 	while ((ret = get_next_line(fd, &line)))
-// 	{
-// 		ft_putstr(line);
-// 		ft_putchar('\n');
-// 		lines++;
-// 	}
-// 	printf("number of lines: %d\n", lines);
-// 	return (0);
-// }
+int	main(int argc, char **argv)
+{
+	int		fd;
+	char	*line;
+	int		ret;
+	int		lines;
+
+	fd = open(argv[1], O_RDONLY);
+	printf("fd: %d\n", fd);
+	lines = 0;
+	if (fd == -1)
+		write(2, "error opening file", ft_strlen("error opening file"));
+	while ((ret = get_next_line(fd, &line)))
+	{
+		ft_putstr(line);
+		ft_putchar('\n');
+		lines++;
+	}
+	printf("number of lines: %d\n", lines);
+	return (0);
+}
